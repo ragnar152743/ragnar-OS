@@ -1,0 +1,29 @@
+# Démonstration d'exécution automatique RGO
+# Ce fichier sera exécuté automatiquement quand vous tapez: auto_demo.rgo
+
+rgo_print "=== DÉMONSTRATION EXÉCUTION AUTOMATIQUE ==="
+rgo_print "Ce fichier .rgo contient du code Python"
+rgo_print "Il s'exécute automatiquement quand détecté par l'OS"
+
+rgo_var current_user = rgo_user()
+rgo_print "Utilisateur actuel: " + current_user
+
+rgo_var current_time = rgo_time()
+rgo_print "Heure d'exécution: " + current_time
+
+rgo_print "Démonstration de calculs:"
+rgo_var a = 15
+rgo_var b = 7
+rgo_var somme = a + b
+rgo_var produit = a * b
+
+rgo_print "a = " + str(a) + ", b = " + str(b)
+rgo_print "Somme: " + str(a) + " + " + str(b) + " = " + str(somme)
+rgo_print "Produit: " + str(a) + " × " + str(b) + " = " + str(produit)
+
+rgo_print "Vérification des fichiers:"
+rgo_var files = rgo_ls()
+rgo_print "Nombre de fichiers dans le répertoire: " + str(len(files))
+
+rgo_print "=== FIN DE LA DÉMONSTRATION ==="
+rgo_print "Tapez simplement 'auto_demo.rgo' pour relancer ce script!"
