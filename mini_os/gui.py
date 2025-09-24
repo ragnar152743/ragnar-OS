@@ -33,15 +33,17 @@ class MiniOSGui:
 
         self.os = os_instance
         self.report = report
+        self._translate = os_instance.language_manager.translate
         self.root = tk.Tk()
-        self.root.title("Ragnar MiniOS")
+        self.root.title(self._translate("gui_window_title"))
         self.root.geometry("1280x800")
         self.root.configure(bg="#050014")
         self.root.minsize(960, 600)
 
-        self.status_var = tk.StringVar(value="Booting Ragnar MiniOS…")
-        self.step_var = tk.StringVar(value="Preparing subsystems…")
+        self.status_var = tk.StringVar(value=self._translate("gui_status_booting"))
+        self.step_var = tk.StringVar(value=self._translate("gui_step_preparing"))
         self._progress_index = 0
+        self._search_placeholder = self._translate("gui_search_placeholder")
 
         self._style = ttk.Style(self.root)
         self._configure_style()
@@ -140,7 +142,7 @@ class MiniOSGui:
 
         logo = tk.Label(
             self.splash_frame,
-            text="Ragnar MiniOS",
+            text=self._translate("gui_splash_logo"),
             font=("Segoe UI", 36, "bold"),
             fg="#f2e8ff",
             bg="#050014",
@@ -149,7 +151,7 @@ class MiniOSGui:
 
         subtitle = tk.Label(
             self.splash_frame,
-            text="Initializing neon desktop shell",
+            text=self._translate("gui_splash_subtitle"),
             font=("Segoe UI", 16),
             fg="#bdb4ff",
             bg="#050014",
@@ -211,12 +213,7 @@ class MiniOSGui:
         if self._progress_index < len(self.report.steps):
             step = self.report.steps[self._progress_index]
             self.step_var.set(step)
-            tag = None
-            if "FAILED" in step.upper():
-                tag = "fail"
-            elif "PASS" in step.upper():
-                tag = "pass"
-            self._append_log(step, tag=tag)
+            self._append_log(step)
             self._progress_index += 1
             if self._progress is not None:
                 self._progress.configure(value=self._progress_index)
@@ -224,9 +221,9 @@ class MiniOSGui:
             return
 
         summary = (
-            "All systems ready."
+            self._translate("gui_summary_ready")
             if self.report.ready
-            else "Integrity verification failed – desktop in safe mode."
+            else self._translate("gui_summary_failed")
         )
         self.status_var.set(summary)
         self.step_var.set(summary)
@@ -251,7 +248,7 @@ class MiniOSGui:
 
         title = tk.Label(
             top_bar,
-            text="Ragnar MiniOS",
+            text=self._translate("gui_window_title"),
             font=("Segoe UI", 20, "bold"),
             fg="#f4f1ff",
             bg="#12063a",
@@ -259,9 +256,9 @@ class MiniOSGui:
         title.pack(side="left", padx=(24, 12), pady=12)
 
         state_text = (
-            "Integrity: PASS · Maintenance queue clear"
+            self._translate("gui_state_ready")
             if self.report.ready
-            else "Integrity: FAIL · Recovery mode engaged"
+            else self._translate("gui_state_failed")
         )
         state_label = tk.Label(
             top_bar,
@@ -279,7 +276,7 @@ class MiniOSGui:
             style="Neon.TEntry",
         )
         search_entry.pack(side="right", padx=24, pady=16)
-        search_entry.insert(0, "Search apps and settings")
+        search_entry.insert(0, self._search_placeholder)
         search_entry.bind("<FocusIn>", self._clear_search_placeholder)
         search_entry.bind("<FocusOut>", self._restore_search_placeholder)
         search_entry.bind("<KeyRelease>", self._on_search_change)
@@ -312,7 +309,7 @@ class MiniOSGui:
 
         system_label = tk.Label(
             status_bar,
-            text="🕒 12:00  ·  🔔 No notifications",
+            text=self._translate("gui_system_label"),
             font=("Segoe UI", 10),
             fg="#d6ceff",
             bg="#12063a",
@@ -332,7 +329,7 @@ class MiniOSGui:
 
         header = tk.Label(
             container,
-            text="Start Menu",
+            text=self._translate("gui_start_menu_title"),
             font=("Segoe UI", 16, "bold"),
             fg="#f4f1ff",
             bg="#10052f",
@@ -341,7 +338,7 @@ class MiniOSGui:
 
         pinned_label = tk.Label(
             container,
-            text="Pinned",
+            text=self._translate("gui_start_menu_pinned"),
             font=("Segoe UI", 12, "bold"),
             fg="#cfc7ff",
             bg="#10052f",
@@ -357,7 +354,7 @@ class MiniOSGui:
 
         apps_label = tk.Label(
             container,
-            text="All Applications",
+            text=self._translate("gui_start_menu_all_apps"),
             font=("Segoe UI", 12, "bold"),
             fg="#cfc7ff",
             bg="#10052f",
@@ -406,7 +403,7 @@ class MiniOSGui:
 
         header = tk.Label(
             container,
-            text="Neon Desktop",
+            text=self._translate("desktop_header"),
             font=("Segoe UI", 16, "bold"),
             fg="#f4f1ff",
             bg="#10052f",
@@ -420,7 +417,7 @@ class MiniOSGui:
         if not app_names:
             empty = tk.Label(
                 grid_frame,
-                text="No applications installed",
+                text=self._translate("gui_no_apps"),
                 font=("Segoe UI", 12),
                 fg="#c9c1ff",
                 bg="#10052f",
@@ -468,7 +465,7 @@ class MiniOSGui:
 
         header = tk.Label(
             container,
-            text="Desktop Widgets",
+            text=self._translate("gui_widgets_title"),
             font=("Segoe UI", 16, "bold"),
             fg="#f4f1ff",
             bg="#10052f",
@@ -482,7 +479,7 @@ class MiniOSGui:
         if not widgets:
             empty = tk.Label(
                 widgets_container,
-                text="No widgets registered yet",
+                text=self._translate("gui_widgets_empty"),
                 font=("Segoe UI", 12),
                 fg="#c9c1ff",
                 bg="#10052f",
@@ -543,7 +540,7 @@ class MiniOSGui:
 
         header = tk.Label(
             container,
-            text="Application Console",
+            text=self._translate("gui_console_title"),
             font=("Segoe UI", 16, "bold"),
             fg="#f4f1ff",
             bg="#10052f",
@@ -592,7 +589,7 @@ class MiniOSGui:
         if not pinned:
             label = tk.Label(
                 self._pinned_container,
-                text="Nothing pinned yet",
+                text=self._translate("gui_start_menu_empty"),
                 font=("Segoe UI", 11),
                 fg="#c9c1ff",
                 bg="#10052f",
@@ -642,7 +639,7 @@ class MiniOSGui:
     def _launch_app(self, app_name: str) -> None:
         output = self.os.open_application(app_name)
         self._write_console(f"▶ {app_name}\n{output}\n")
-        self.status_var.set(f"Launched {app_name}")
+        self.status_var.set(self._translate("gui_status_launched", application=app_name))
 
     def _write_console(self, message: str) -> None:
         if not self.output_widget:
@@ -655,7 +652,7 @@ class MiniOSGui:
 
     def _on_search_change(self, _event: object) -> None:
         query = self.search_var.get().strip().lower()
-        if not query or query == "search apps and settings".lower():
+        if not query or query == self._search_placeholder.lower():
             self._apply_search_filter(None)
             return
         self._apply_search_filter(query)
@@ -669,12 +666,12 @@ class MiniOSGui:
         self._populate_app_lists(filtered if query else app_names)
 
     def _clear_search_placeholder(self, _event: object) -> None:
-        if self.search_var.get() == "Search apps and settings":
+        if self.search_var.get() == self._search_placeholder:
             self.search_var.set("")
 
     def _restore_search_placeholder(self, _event: object) -> None:
         if not self.search_var.get():
-            self.search_var.set("Search apps and settings")
+            self.search_var.set(self._search_placeholder)
 
     # ------------------------------------------------------------------
     # Lifecycle

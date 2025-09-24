@@ -6,7 +6,9 @@ import os
 import re
 from dataclasses import dataclass
 from itertools import zip_longest
-from typing import Iterable, List, Sequence, Tuple
+from typing import Callable, Iterable, List, Sequence, Tuple
+
+from .localization import LanguageManager, DEFAULT_LANGUAGE
 
 
 RESET = "\033[0m"
@@ -105,13 +107,13 @@ class Theme:
         bar = self.accent("━" * len(text))
         return f"{self.primary(text)}\n{bar}"
 
-    def render_status(self, widget_count: int) -> str:
+    def render_status(self, status_text: str) -> str:
         jewel = self.accent("◆")
-        descriptor = f"{widget_count} widget{'s' if widget_count != 1 else ''} ready"
-        return self.secondary(f"{jewel} {descriptor} · Theme: {self.name}")
+        return self.secondary(f"{jewel} {status_text}")
 
-    def render_empty_state(self) -> str:
-        return self.secondary("No widgets registered yet. Add one to light up the desktop.")
+    def render_empty_state(self, text: str | None = None) -> str:
+        message = text or "No widgets registered yet. Add one to light up the desktop."
+        return self.secondary(message)
 
     def divider(self, width: int) -> str:
         return self.accent("─" * width)
@@ -150,17 +152,32 @@ class Widget:
 class InterfaceManager:
     """Responsible for rendering different textual interfaces of the Mini OS."""
 
-    def __init__(self, theme: Theme | None = None, enable_color: bool | None = None) -> None:
+    def __init__(
+        self,
+        theme: Theme | None = None,
+        enable_color: bool | None = None,
+        translator: Callable[..., str] | None = None,
+    ) -> None:
         if enable_color is None:
             disable_color = os.environ.get("MINIOS_NO_COLOR", "").lower() in {"1", "true", "yes"}
             enable_color = not disable_color
         self.theme: Theme = theme or Theme.neon(enable_color=enable_color)
+        default_translator = LanguageManager(DEFAULT_LANGUAGE).translate
+        self._translator: Callable[..., str] = translator or default_translator
         self.widgets: List[Widget] = []
 
     def set_theme(self, theme: Theme) -> None:
         """Update the active theme used when rendering the UI."""
 
         self.theme = theme
+
+    def set_translator(self, translator: Callable[..., str]) -> None:
+        """Update the translator used for interface copy."""
+
+        self._translator = translator
+
+    def translate(self, key: str, **kwargs) -> str:
+        return self._translator(key, **kwargs)
 
     def register_widget(self, widget: Widget) -> None:
         """Add a widget that will be displayed on the home interface."""
@@ -170,24 +187,28 @@ class InterfaceManager:
     def render_home(self) -> str:
         """Render the home interface, showing all registered widgets."""
 
-        parts: List[str] = [self.theme.render_banner(), self.theme.render_tagline("Welcome back to MiniOS")]
+        tagline = self.translate("home_tagline")
+        parts: List[str] = [self.theme.render_banner(), self.theme.render_tagline(tagline)]
         if not self.widgets:
-            parts.append(self.theme.render_empty_state())
+            parts.append(self.theme.render_empty_state(self.translate("home_empty")))
         else:
             rendered = [widget.render(self.theme) for widget in self.widgets]
             parts.append("\n\n".join(rendered))
-        parts.append(self.theme.render_status(len(self.widgets)))
+        count = len(self.widgets)
+        plural = "" if count == 1 else "s"
+        status_text = self.translate("home_status", count=count, plural=plural, theme=self.theme.name)
+        parts.append(self.theme.render_status(status_text))
         return "\n\n".join(parts)
 
     def render_app_menu(self, app_names: Iterable[str]) -> str:
         """Render a neon-styled textual app menu."""
 
-        menu_lines = [self.theme.render_tagline("Available Applications")]
+        menu_lines = [self.theme.render_tagline(self.translate("app_menu_title"))]
         for index, name in enumerate(app_names, start=1):
             badge = self.theme.surface(f"{index:02d}")
             menu_lines.append(f"  {badge} {self.theme.secondary(name)}")
         if len(menu_lines) == 1:
-            menu_lines.append(self.theme.secondary("  (no applications installed)"))
+            menu_lines.append(self.theme.secondary(self.translate("app_menu_empty")))
         return "\n".join(menu_lines)
 
     # ------------------------------------------------------------------
@@ -197,9 +218,9 @@ class InterfaceManager:
         """Render a faux desktop showing applications as neon icons."""
 
         if not app_names:
-            return self.theme.render_empty_state()
+            return self.theme.render_empty_state(self.translate("desktop_empty"))
 
-        header = self.theme.render_tagline("Neon Desktop")
+        header = self.theme.render_tagline(self.translate("desktop_header"))
         columns = 3
         padded_names = list(app_names)
         rows: List[str] = []
@@ -240,11 +261,11 @@ class InterfaceManager:
     def render_start_menu(self, app_names: Sequence[str]) -> str:
         """Render a Start menu style launcher panel."""
 
-        header = self.theme.render_tagline("Start Menu")
+        header = self.theme.render_tagline(self.translate("start_menu_title"))
         pinned = list(app_names[:6])
-        pinned_lines = [self.theme.accent("Pinned")]
+        pinned_lines = [self.theme.accent(self.translate("start_menu_pinned"))]
         if not pinned:
-            pinned_lines.append(self.theme.secondary("  (nothing pinned yet)"))
+            pinned_lines.append(self.theme.secondary(self.translate("start_menu_pinned_empty")))
         else:
             for name in pinned:
                 icon = resolve_app_icon(name)
@@ -252,13 +273,13 @@ class InterfaceManager:
                     f"  {self.theme.primary(icon)} {self.theme.secondary(name)}"
                 )
 
-        all_apps_header = self.theme.accent("All Apps")
+        all_apps_header = self.theme.accent(self.translate("start_menu_all_apps"))
         menu_entries = []
         for index, name in enumerate(app_names, start=1):
             badge = self.theme.surface(f"{index:02d}")
             menu_entries.append(f"  {badge} {self.theme.secondary(name)}")
         if not menu_entries:
-            menu_entries.append(self.theme.secondary("  (no applications installed)"))
+            menu_entries.append(self.theme.secondary(self.translate("start_menu_no_apps")))
 
         panel = [header, "\n".join(pinned_lines), all_apps_header, "\n".join(menu_entries)]
         return "\n\n".join(panel)
@@ -275,7 +296,7 @@ class InterfaceManager:
             "      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚═╝  ╚═══╝",
         ]
 
-        subtitle = self.theme.secondary("Booting Ragnar MiniOS · ultra neon edition")
+        subtitle = self.theme.secondary(self.translate("boot_subtitle"))
 
         total = max(len(steps), 1)
         orbit_symbols = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
@@ -293,7 +314,9 @@ class InterfaceManager:
             self.theme.accent("▰" * filled_segments)
             + self.theme.secondary("▱" * (segments - filled_segments))
         )
-        progress_label = self.theme.primary(f"Loading modules {len(steps):02d}/{total:02d}")
+        progress_label = self.theme.primary(
+            self.translate("boot_progress_label", completed=len(steps), total=total)
+        )
         progress_text = f"{bar} {progress_label}"
 
         stage_preview = stage_lines[-4:]

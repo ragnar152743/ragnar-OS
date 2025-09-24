@@ -8,6 +8,16 @@ from typing import Iterable, List, Mapping
 
 
 @dataclass
+class FileLoadRecord:
+    """Record describing a simulated file load during boot."""
+
+    path: str
+    index: int
+    total: int
+    bytes_cached: int | None
+
+
+@dataclass
 class FileLoader:
     """Load key MiniOS files during boot to mimic a startup sequence."""
 
@@ -23,29 +33,36 @@ class FileLoader:
         ordered_files = sorted(manifest.keys())
         return cls(files=ordered_files)
 
-    def load_all(self) -> List[str]:
-        """Simulate loading each file and return a log of the operations."""
+    def load_all(self) -> List[FileLoadRecord]:
+        """Simulate loading each file and return structured load records."""
 
         file_list = list(self.files)
         total = len(file_list)
-        log: List[str] = []
+        log: List[FileLoadRecord] = []
 
         if total == 0:
-            return ["No files registered for boot loading."]
+            return []
 
         for index, relative_path in enumerate(file_list, start=1):
             absolute_path = self.root_directory / relative_path
             if absolute_path.exists():
                 size = absolute_path.stat().st_size
-                log.append(
-                    f"Loaded {relative_path} [{index}/{total}] ({size} bytes cached)"
+                record = FileLoadRecord(
+                    path=relative_path,
+                    index=index,
+                    total=total,
+                    bytes_cached=size,
                 )
             else:
-                log.append(
-                    f"Missing {relative_path} during boot load [{index}/{total}]"
+                record = FileLoadRecord(
+                    path=relative_path,
+                    index=index,
+                    total=total,
+                    bytes_cached=None,
                 )
+            log.append(record)
 
         return log
 
 
-__all__ = ["FileLoader"]
+__all__ = ["FileLoader", "FileLoadRecord"]

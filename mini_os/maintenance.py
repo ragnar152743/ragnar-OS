@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import hashlib
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+from dataclasses import dataclass, field
+
+from .localization import LanguageManager
 
 def _read_file_hash(path: Path) -> str:
     digest = hashlib.sha256()
@@ -22,12 +24,13 @@ class FileIntegrityVerifier:
 
     expected_hashes: Dict[str, str]
     root_directory: Path = field(default_factory=lambda: Path(__file__).resolve().parents[1])
+    language_manager: LanguageManager | None = None
 
     @classmethod
-    def default_manifest(cls) -> "FileIntegrityVerifier":
+    def default_manifest(cls, language_manager: LanguageManager | None = None) -> "FileIntegrityVerifier":
         from .manifest import EXPECTED_HASHES
 
-        return cls(expected_hashes=EXPECTED_HASHES)
+        return cls(expected_hashes=EXPECTED_HASHES, language_manager=language_manager)
 
     def verify(self) -> Tuple[bool, str]:
         """Return a tuple of (ok, message) after verifying all files."""
@@ -44,11 +47,20 @@ class FileIntegrityVerifier:
                     f"{relative_path}: expected {expected[:8]} got {actual[:8]}"
                 )
 
+        translator = self.language_manager.translate if self.language_manager else None
         if mismatches:
-            message = "Integrity check FAILED -> " + "; ".join(mismatches)
+            details = "; ".join(mismatches)
+            if translator:
+                message = translator("integrity_fail_prefix", details=details)
+            else:
+                message = "Integrity check FAILED -> " + details
             return False, message
 
-        message = f"Integrity check passed for {len(self.expected_hashes)} files."
+        count = len(self.expected_hashes)
+        if translator:
+            message = translator("integrity_pass", count=count)
+        else:
+            message = f"Integrity check passed for {count} files."
         return True, message
 
 
@@ -77,6 +89,7 @@ class AutoMaintenanceGuardian:
     # Maintenance jobs -------------------------------------------------
 
     def _scan_application_health(self) -> str:
+        translator = self.os_reference.language_manager.translate
         apps = list(self.os_reference.application_manager.list_applications())
         failures: List[str] = []
         for app in apps:
@@ -88,22 +101,21 @@ class AutoMaintenanceGuardian:
                 failures.append(f"{app.name}: {exc}")
 
         if failures:
-            return "Application health issues detected -> " + "; ".join(failures)
-        return f"All {len(apps)} applications responded successfully."
+            return translator("maintenance_apps_failure", details="; ".join(failures))
+        return translator("maintenance_apps_ok", count=len(apps))
 
     def _refresh_interface_summary(self) -> str:
         widgets = list(self.os_reference.interface_manager.widgets)
+        translator = self.os_reference.language_manager.translate
         if not widgets:
-            return "Interface warning: no widgets registered."
+            return translator("maintenance_interface_missing")
         titles = ", ".join(widget.title for widget in widgets)
-        return f"Interface refreshed with widgets: {titles}."
+        return translator("maintenance_interface_ok", titles=titles)
 
     def _schedule_background_tasks(self) -> str:
         app_count = len(list(self.os_reference.application_manager.list_applications()))
-        return (
-            "Background scheduler primed -> "
-            f"auto-backups for {app_count} apps queued."
-        )
+        translator = self.os_reference.language_manager.translate
+        return translator("maintenance_background", count=app_count)
 
 
 __all__ = ["FileIntegrityVerifier", "AutoMaintenanceGuardian"]

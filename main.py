@@ -8,14 +8,16 @@ from mini_os import BootReport, MiniOS, boot_sequence
 
 
 def _run_text_demo(os_instance: MiniOS, report: BootReport) -> None:
+    translator = os_instance.language_manager.translate
     print(report.splash)
     print()
     print(report.summary())
     print()
     if not report.ready:
-        print("Boot failed integrity verification. Aborting demo launch.")
+        print(translator("boot_failure_abort"))
         return
 
+    print(translator("demo_description"))
     print(os_instance.describe())
     print()
     print(os_instance.render_desktop())
@@ -26,7 +28,7 @@ def _run_text_demo(os_instance: MiniOS, report: BootReport) -> None:
     print(os_instance.render_app_menu())
     print()
     for app_name in os_instance.list_app_names():
-        print(f"Launching {app_name}...")
+        print(translator("demo_launching", application=app_name))
         print(os_instance.open_application(app_name))
         print()
 

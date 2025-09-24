@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 EXPECTED_HASHES = {
-    "main.py": "e4625b785031bdeaa28de30a7ab348319a52aadde4527829cc1d41430f3a38fb",
-    "mini_os/__init__.py": "02f8a62bf0de6ec8ddcfa60468ec6902119eaf42d3887189e2bb7e6cccdd2789",
-    "mini_os/all_in_one.py": "d78e3b577b82486457c44e12ee41bcc0ccafd6927d58e62d8f7788f7d4f2fd7e",
+    "main.py": "356034bb28c51b7b181f6d65771da4795d966e8d9774a0ba59520474fe8b674f",
+    "mini_os/__init__.py": "c9701621c2af445dd347c7c6f2fbe64a9a65eab0925441c97b383af9561c49f2",
+    "mini_os/all_in_one.py": "7b4f9722debf7ae34f6df2d5a5c3872d1111305a97faf04e8ef1760abe2b96cb",
     "mini_os/applications.py": "22919c6e709261510e0566024544d3e59c03f60d0338223ae3d9af84b389193d",
-    "mini_os/boot.py": "f5a88dcc95fbba627f37162aef356f0b39912593492ec40d46c804c7b3d70564",
-    "mini_os/interfaces.py": "65693d11471001ab6f995df543ed6dcad73f1a0d63515ad7a5180a7b0bff1357",
-    "mini_os/maintenance.py": "35f98c9b51d8ca316651ed7d03d9428d66859e0738c5aae11bec67d660a37ff8",
-    "mini_os/loading.py": "226142143547b861f32b944f1adb665ff6ac9d2c93eb2a311e3831966c1b339f",
-    "mini_os/gui.py": "ca911a8834ba3b2957ae9161c43e21d77597c73fdd44fe1eb30a755d4249b440",
+    "mini_os/boot.py": "165da8c63584b6809d65ef208a5b879bf293837ec8250ca294963713360c3200",
+    "mini_os/interfaces.py": "e06511d2feb2f2c3f0f1eb413341fcf29ea7864a9b51ff4c48a72c487f32ebb5",
+    "mini_os/maintenance.py": "2ff46bf888bf66653898cf738055120c8c907aefb3b2c226a748bc48fba7327a",
+    "mini_os/loading.py": "1e8cb1ff56541c481b63b3c852890d60b0f7f77eb678ae5947b9f4f8f09e47b5",
+    "mini_os/gui.py": "8ceb847be0c26e758fe0cba510dbf4c9dd4771e293373b4a4dd0c9d97c9d176e",
+    "mini_os/localization.py": "29e5a4fbd8b99d8728cf50b6241af3ba8755be1c8af15494d683217af2644f25",
     "launcher.bat": "7994771fb92acbea33664b1d4329937674cfff618035ee0603b20edf2a94066f",
 }
 

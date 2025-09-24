@@ -3,6 +3,7 @@
 from .all_in_one import MiniOS
 from .applications import Application, ApplicationManager
 from .interfaces import InterfaceManager
+from .localization import LanguageManager
 from .boot import BootReport, boot_sequence
 from .loading import FileLoader
 from .maintenance import AutoMaintenanceGuardian, FileIntegrityVerifier
@@ -13,6 +14,7 @@ __all__ = [
     "Application",
     "ApplicationManager",
     "InterfaceManager",
+    "LanguageManager",
     "MiniOSGui",
     "BootReport",
     "boot_sequence",

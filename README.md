@@ -20,6 +20,8 @@ pieces together.
   launcher icons, widgets, and a Start menu featuring pinned and searchable app listings.
 - **Neon user interface** – the text renderer remains available as a fallback, retaining the vibrant,
   neon-inspired styling for environments where a GUI cannot be launched.
+- **Internationalised onboarding** – the first boot greets you with a multilingual language selector
+  (English, Français, Español, Deutsch) and stores the preference for all subsequent sessions.
 
 ## Running the demo
 
@@ -42,7 +44,9 @@ python main.py --demo --text
 ```
 
 The text mode prints the boot report, describes the OS, renders the neon-styled console screens, and
-launches each built-in application sequentially so you can inspect their output in the terminal.
+launches each built-in application sequentially so you can inspect their output in the terminal. On the
+very first run you will be asked to choose a language (or default to English when running non-
+interactively); the selection is stored in `mini_os_state.json`.
 
 ### Windows launcher
 

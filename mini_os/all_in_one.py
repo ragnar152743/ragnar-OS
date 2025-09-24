@@ -7,6 +7,7 @@ from typing import List, Sequence
 
 from .applications import ApplicationManager, DEFAULT_APPLICATIONS
 from .interfaces import InterfaceManager, Widget
+from .localization import LanguageManager
 from .maintenance import AutoMaintenanceGuardian, FileIntegrityVerifier
 
 
@@ -14,45 +15,52 @@ from .maintenance import AutoMaintenanceGuardian, FileIntegrityVerifier
 class MiniOS:
     """Represents the running Mini OS environment."""
 
-    interface_manager: InterfaceManager = field(default_factory=InterfaceManager)
+    language_manager: LanguageManager | None = None
+    interface_manager: InterfaceManager | None = None
     application_manager: ApplicationManager = field(default_factory=ApplicationManager)
-    integrity_verifier: FileIntegrityVerifier = field(
-        default_factory=FileIntegrityVerifier.default_manifest
-    )
+    integrity_verifier: FileIntegrityVerifier | None = None
     maintenance_guardian: AutoMaintenanceGuardian = field(init=False)
 
     def __post_init__(self) -> None:
+        lang_manager: LanguageManager
+        if self.language_manager is None:
+            lang_manager, _ = LanguageManager.load_or_initialize()
+            self.language_manager = lang_manager
+        else:
+            lang_manager = self.language_manager
+
+        if self.interface_manager is None:
+            self.interface_manager = InterfaceManager(translator=lang_manager.translate)
+        else:
+            self.interface_manager.set_translator(lang_manager.translate)
+
+        if self.integrity_verifier is None:
+            self.integrity_verifier = FileIntegrityVerifier.default_manifest(
+                language_manager=lang_manager
+            )
+
         for app in DEFAULT_APPLICATIONS:
             self.application_manager.install(app)
+        translator = self.language_manager.translate
         self.interface_manager.register_widget(
             Widget(
-                title="Welcome to MiniOS",
+                title=translator("welcome_widget_title"),
                 icon="✨",
-                body=(
-                    "Use the application menu to explore built-in apps.\n"
-                    "This is a toy example showing how components can be separated."
-                ),
+                body=translator("welcome_widget_body"),
             )
         )
         self.interface_manager.register_widget(
             Widget(
-                title="System Snapshot",
+                title=translator("snapshot_widget_title"),
                 icon="🛡️",
-                body=(
-                    "Integrity status: PASS\n"
-                    "Maintenance queue: All background jobs scheduled"
-                ),
+                body=translator("snapshot_widget_body"),
             )
         )
         self.interface_manager.register_widget(
             Widget(
-                title="Quick Actions",
+                title=translator("quick_widget_title"),
                 icon="🎛️",
-                body=(
-                    "F1  View app marketplace preview\n"
-                    "F2  Inspect service registry\n"
-                    "F3  Launch the system monitor"
-                ),
+                body=translator("quick_widget_body"),
             )
         )
         self.maintenance_guardian = AutoMaintenanceGuardian(self)
@@ -76,16 +84,11 @@ class MiniOS:
         return self.interface_manager.render_start_menu(self.list_app_names())
 
     def render_boot_splash(self, steps: Sequence[str]) -> str:
-        return self.interface_manager.render_boot_splash("Ragnar MiniOS", steps)
+        title = self.language_manager.translate("boot_title")
+        return self.interface_manager.render_boot_splash(title, steps)
 
     def describe(self) -> str:
-        return (
-            "MiniOS integrates dedicated components: one for interfaces, "
-            "another for applications, a boot sequence in Python, and a "
-            "controller that ties everything together. The desktop, "
-            "Start menu, and boot splash are all rendered through the "
-            "interface subsystem."
-        )
+        return self.language_manager.translate("describe_text")
 
     def run_auto_maintenance(self) -> List[str]:
         return self.maintenance_guardian.run_startup_jobs()
