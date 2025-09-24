@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, List
+from typing import List, Sequence
 
 from .applications import ApplicationManager, DEFAULT_APPLICATIONS
 from .interfaces import InterfaceManager, Widget
@@ -57,8 +57,8 @@ class MiniOS:
         )
         self.maintenance_guardian = AutoMaintenanceGuardian(self)
 
-    def list_app_names(self) -> Iterable[str]:
-        return (app.name for app in self.application_manager.list_applications())
+    def list_app_names(self) -> List[str]:
+        return [app.name for app in self.application_manager.list_applications()]
 
     def open_application(self, name: str) -> str:
         return self.application_manager.launch(name)
@@ -69,11 +69,22 @@ class MiniOS:
     def render_app_menu(self) -> str:
         return self.interface_manager.render_app_menu(self.list_app_names())
 
+    def render_desktop(self) -> str:
+        return self.interface_manager.render_desktop(self.list_app_names())
+
+    def render_start_menu(self) -> str:
+        return self.interface_manager.render_start_menu(self.list_app_names())
+
+    def render_boot_splash(self, steps: Sequence[str]) -> str:
+        return self.interface_manager.render_boot_splash("Ragnar MiniOS", steps)
+
     def describe(self) -> str:
         return (
             "MiniOS integrates dedicated components: one for interfaces, "
             "another for applications, a boot sequence in Python, and a "
-            "controller that ties everything together."
+            "controller that ties everything together. The desktop, "
+            "Start menu, and boot splash are all rendered through the "
+            "interface subsystem."
         )
 
     def run_auto_maintenance(self) -> List[str]:

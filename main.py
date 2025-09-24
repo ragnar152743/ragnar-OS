@@ -9,6 +9,8 @@ from mini_os import MiniOS, boot_sequence
 
 def run_demo() -> None:
     os_instance, report = boot_sequence()
+    print(report.splash)
+    print()
     print(report.summary())
     print()
     if not report.ready:
@@ -16,6 +18,10 @@ def run_demo() -> None:
         return
 
     print(os_instance.describe())
+    print()
+    print(os_instance.render_desktop())
+    print()
+    print(os_instance.render_start_menu())
     print()
     print(os_instance.render_home())
     print(os_instance.render_app_menu())

@@ -15,6 +15,7 @@ class BootReport:
 
     steps: list[str]
     ready: bool
+    splash: str
 
     def summary(self) -> str:
         status = "READY" if self.ready else "FAILED"
@@ -46,5 +47,7 @@ def boot_sequence() -> tuple[MiniOS, BootReport]:
     for entry in maintenance_steps:
         steps.append(f"Maintenance: {entry}")
 
-    report = BootReport(steps=steps, ready=integrity_ok)
+    splash = os_instance.render_boot_splash(steps)
+
+    report = BootReport(steps=steps, ready=integrity_ok, splash=splash)
     return os_instance, report

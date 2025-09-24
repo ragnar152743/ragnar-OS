@@ -18,6 +18,8 @@ pieces together.
   information at runtime.
 - **Neon user interface** – the home desktop now renders a vibrant, neon-inspired console UI with
   animated-style headers, iconography, and stylised panels for each widget.
+- **Immersive desktop shell** – experience a faux Windows-like boot splash, a neon desktop covered in
+  application icons, and a Start menu panel that highlights pinned and full application listings.
 
 ## Running the demo
 
@@ -29,8 +31,9 @@ Run the demo with:
 python main.py --demo
 ```
 
-The command prints the boot report, describes the OS, renders the home widgets, lists the available
-applications, and sequentially launches each app so you can inspect the generated output.
+The command prints the boot splash and diagnostic report, describes the OS, renders the neon desktop,
+shows the Start menu, displays the home widgets, lists the available applications, and sequentially
+launches each app so you can inspect the generated output.
 
 ### Windows launcher
 
