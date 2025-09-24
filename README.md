@@ -16,10 +16,10 @@ pieces together.
 - **Rich application catalogue** – beyond the classic Notes, Terminal, and Settings apps, MiniOS ships
   calculator, weather, calendar, music, news, and system monitor experiences that generate contextual
   information at runtime.
-- **Neon user interface** – the home desktop now renders a vibrant, neon-inspired console UI with
-  animated-style headers, iconography, and stylised panels for each widget.
-- **Immersive desktop shell** – experience a faux Windows-like boot splash, a neon desktop covered in
-  application icons, and a Start menu panel that highlights pinned and full application listings.
+- **Graphical desktop shell** – a full Tkinter desktop experience with animated splash screen, stylised
+  launcher icons, widgets, and a Start menu featuring pinned and searchable app listings.
+- **Neon user interface** – the text renderer remains available as a fallback, retaining the vibrant,
+  neon-inspired styling for environments where a GUI cannot be launched.
 
 ## Running the demo
 
@@ -31,9 +31,18 @@ Run the demo with:
 python main.py --demo
 ```
 
-The command prints the boot splash and diagnostic report, describes the OS, renders the neon desktop,
-shows the Start menu, displays the home widgets, lists the available applications, and sequentially
-launches each app so you can inspect the generated output.
+If Tkinter and a display server are available, this opens the graphical Ragnar MiniOS desktop – complete
+with splash screen, neon taskbar, desktop icons, Start menu, widgets, and an application console that
+shows live output as you launch apps.
+
+If you are working inside a headless environment, add `--text` to force the colourful console fallback:
+
+```bash
+python main.py --demo --text
+```
+
+The text mode prints the boot report, describes the OS, renders the neon-styled console screens, and
+launches each built-in application sequentially so you can inspect their output in the terminal.
 
 ### Windows launcher
 

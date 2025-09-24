@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import argparse
 
-from mini_os import MiniOS, boot_sequence
+from mini_os import BootReport, MiniOS, boot_sequence
 
 
-def run_demo() -> None:
-    os_instance, report = boot_sequence()
+def _run_text_demo(os_instance: MiniOS, report: BootReport) -> None:
     print(report.splash)
     print()
     print(report.summary())
@@ -32,6 +31,35 @@ def run_demo() -> None:
         print()
 
 
+def run_demo(text_only: bool = False) -> None:
+    os_instance, report = boot_sequence()
+    if text_only:
+        _run_text_demo(os_instance, report)
+        return
+
+    try:
+        from mini_os.gui import MiniOSGui
+    except Exception as exc:  # pragma: no cover - Tk may be missing
+        print("Graphical UI unavailable (", exc, ") – falling back to text mode.")
+        _run_text_demo(os_instance, report)
+        return
+
+    if not MiniOSGui.is_supported():
+        print("Graphical UI not supported in this environment. Using text mode.")
+        _run_text_demo(os_instance, report)
+        return
+
+    try:
+        gui = MiniOSGui(os_instance, report)
+    except RuntimeError as exc:  # pragma: no cover - environment guard
+        print(exc)
+        print("Falling back to text mode.")
+        _run_text_demo(os_instance, report)
+        return
+
+    gui.run()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Ragnar Mini OS demo.")
     parser.add_argument(
@@ -39,10 +67,15 @@ def main() -> None:
         action="store_true",
         help="Boot the Mini OS and show the interface/app demonstrations.",
     )
+    parser.add_argument(
+        "--text",
+        action="store_true",
+        help="Render the textual fallback UI instead of the graphical desktop.",
+    )
     args = parser.parse_args()
 
     if args.demo:
-        run_demo()
+        run_demo(text_only=args.text)
     else:
         parser.print_help()
 

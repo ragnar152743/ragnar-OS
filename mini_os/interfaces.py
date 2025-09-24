@@ -14,6 +14,27 @@ RESET = "\033[0m"
 _ANSI_PATTERN = re.compile(r"\x1b\[[0-9;]*m")
 
 
+# Shared icon map so both the textual and graphical shells can keep a
+# consistent visual language.
+APP_ICON_MAP: dict[str, str] = {
+    "Notes": "📝",
+    "Terminal": "💻",
+    "Settings": "⚙️",
+    "Calculator": "🧮",
+    "Weather": "☀️",
+    "Calendar": "📅",
+    "Music": "🎶",
+    "News": "📰",
+    "System Monitor": "📊",
+}
+
+
+def resolve_app_icon(app_name: str) -> str:
+    """Return a decorative icon for the given application."""
+
+    return APP_ICON_MAP.get(app_name, "🪟")
+
+
 def _visible_length(text: str) -> int:
     """Return the display length of a string ignoring ANSI escape codes."""
 
@@ -172,21 +193,6 @@ class InterfaceManager:
     # ------------------------------------------------------------------
     # Desktop & start menu renderers
 
-    _APP_ICON_MAP: dict[str, str] = {
-        "Notes": "📝",
-        "Terminal": "💻",
-        "Settings": "⚙️",
-        "Calculator": "🧮",
-        "Weather": "☀️",
-        "Calendar": "📅",
-        "Music": "🎶",
-        "News": "📰",
-        "System Monitor": "📊",
-    }
-
-    def _resolve_icon(self, app_name: str) -> str:
-        return self._APP_ICON_MAP.get(app_name, "🪟")
-
     def render_desktop(self, app_names: Sequence[str]) -> str:
         """Render a faux desktop showing applications as neon icons."""
 
@@ -204,7 +210,7 @@ class InterfaceManager:
                 if not name:
                     cells.append(" " * 20)
                     continue
-                icon = self._resolve_icon(name)
+                icon = resolve_app_icon(name)
                 label = f"{icon}  {name}"
                 cells.append(self.theme.secondary(f"{label:<20}"))
             rows.append("  ".join(cells).rstrip())
@@ -241,7 +247,7 @@ class InterfaceManager:
             pinned_lines.append(self.theme.secondary("  (nothing pinned yet)"))
         else:
             for name in pinned:
-                icon = self._resolve_icon(name)
+                icon = resolve_app_icon(name)
                 pinned_lines.append(
                     f"  {self.theme.primary(icon)} {self.theme.secondary(name)}"
                 )

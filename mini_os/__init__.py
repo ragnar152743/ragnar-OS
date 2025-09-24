@@ -3,15 +3,18 @@
 from .all_in_one import MiniOS
 from .applications import Application, ApplicationManager
 from .interfaces import InterfaceManager
-from .boot import boot_sequence
+from .boot import BootReport, boot_sequence
 from .loading import FileLoader
 from .maintenance import AutoMaintenanceGuardian, FileIntegrityVerifier
+from .gui import MiniOSGui
 
 __all__ = [
     "MiniOS",
     "Application",
     "ApplicationManager",
     "InterfaceManager",
+    "MiniOSGui",
+    "BootReport",
     "boot_sequence",
     "FileLoader",
     "AutoMaintenanceGuardian",
