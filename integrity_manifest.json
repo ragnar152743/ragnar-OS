@@ -1,0 +1,10 @@
+{
+  "main.py": "d71ab32d464fbaa64b384107cf3184d8b408eb5fcfe0676ba09295b3ac8639aa",
+  "mini_os/applications.py": "0a6f7d2bb038933aa411691f4faef2391ef06745fe77208dab9b23ef18018b7e",
+  "mini_os/all_in_one.py": "03a385309d1b9dcda7704ac58521324328aa8f23f93b59ea6e6eb07cd3c00060",
+  "mini_os/boot.py": "72e8c0214f3a5355b07e484cc4c86db48ec4198052194f9b3b10a2f19c103b1a",
+  "mini_os/interfaces.py": "1db24bddb43debf43aa75f31585d4a7b3a139cb49e361b021bbc2c9a83d1ca46",
+  "mini_os/update.py": "929a514b58cd67dcb717197ee42cfe5e759e4053cbdc785f28893a4ce933464d",
+  "mini_os/integrity.py": "9286177f27e07235ba3860d8b6113d14d513f888d683a8db0e19e4c6de3e4020",
+  "mini_os/utils.py": "a5fe2fc9f378a1e46b142bd8070dc3949e3288a427ff50e2c84011ee17a9fa0f"
+}

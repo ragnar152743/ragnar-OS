@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Iterable, Optional
 
 from .applications import ApplicationManager, DEFAULT_APPLICATIONS
 from .interfaces import InterfaceManager, Widget
+from .update import UpdateManager, UpdateSummary
 
 
 @dataclass
@@ -15,16 +16,28 @@ class MiniOS:
 
     interface_manager: InterfaceManager = field(default_factory=InterfaceManager)
     application_manager: ApplicationManager = field(default_factory=ApplicationManager)
+    update_manager: Optional[UpdateManager] = field(init=False, default=None)
+    last_update_summary: Optional[UpdateSummary] = field(init=False, default=None)
 
     def __post_init__(self) -> None:
         for app in DEFAULT_APPLICATIONS:
-            self.application_manager.install(app)
+            self.application_manager.install(app, overwrite=True)
+
+        self.update_manager = UpdateManager(self.application_manager)
+        self.last_update_summary = self.update_manager.run()
+        applied = self.last_update_summary.updated if self.last_update_summary else []
         self.interface_manager.register_widget(
             Widget(
                 title="Welcome to MiniOS",
                 body=(
                     "Use the application menu to explore built-in apps.\n"
-                    "This is a toy example showing how components can be separated."
+                    "This is a toy example showing how components can be separated.\n"
+                    + (
+                        "Automatic updates applied: "
+                        + ", ".join(applied)
+                        if applied
+                        else "All applications up to date."
+                    )
                 ),
             )
         )
@@ -45,5 +58,6 @@ class MiniOS:
         return (
             "MiniOS integrates dedicated components: one for interfaces, "
             "another for applications, a boot sequence in Python, and a "
-            "controller that ties everything together."
+            "controller that ties everything together. Automatic updates "
+            "and integrity checks keep the environment healthy."
         )
